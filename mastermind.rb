@@ -1,13 +1,10 @@
-# use numbers instead of colors for code configuration
-# example secret code [1, 2, 3, 4]
-# 6 optional colors
+# switch secret code to use colors, there should be 6 possile colors
 
-# each game should consist of 2 rounds so each player gets to play as the codebreaker and code maker
 class Game
   def initialize(code_breaker, code_maker)
     @code_breaker = code_breaker
     @code_maker = code_maker
-    @secret_code = [1, 2, 3, 4] # try gets.chomp.to_a? later
+    @secret_code = [] # ['red', 'blue', 'green', 'yellow'] # [1, 2, 3, 4] # set to [] and assign value in start game
     @total_points = 0
   end
 
@@ -18,13 +15,22 @@ class Game
     winner = false
     current_round = 0
     max_round = 12
+    total_guesses = []
     total_check_guess_output = []
+
+    puts "\n#{@code_breaker.name} look away! #{@code_maker.name} please input your code!"
+
+    @secret_code = sanitized_input
+
     while current_round < max_round && winner == false
       puts "\nTHIS IS ROUND #{current_round + 1}"
       puts "\nenter your guess"
-      guess = santized(gets.chomp)
+      guess = sanitized_input
+      total_guesses << guess
       total_check_guess_output << check_guess(guess, @secret_code)
-      p total_check_guess_output # make a nicer print statement
+      #p total_check_guess_output # make a nicer print statement
+      #p total_guesses
+      printer(total_guesses, total_check_guess_output)
 
       # checks for winner
       winner = true if total_check_guess_output.include?([true, true, true, true])
@@ -36,11 +42,24 @@ class Game
     @code_maker.points += 1 if winner == false
 
     puts "\nThat it for this game, the codemaker #{@code_maker.name} has #{@code_maker.points}"
-    
   end
 
-  def santized(input)
-    input.split(" ").map { |item| item.to_i }
+  def sanitized_input
+    options = %w[Red Purple Blue Green Yellow Orange]
+    return_array = []
+    puts "\nYour options are Red, Purple, Blue, Green, Yellow, Orange"
+    puts "Only pick 4, seperate with spaces, no duplicates"
+    input_arr = gets.chomp.split(" ")[0, 4]
+    input_arr << nil while input_arr.length < 4
+    input_arr.each do |item|
+      if options.include?(item.to_s.capitalize)
+        return_array << item.capitalize
+      else
+        puts "One of your inputs was not recognized, so we randomly chose for you"
+        return_array << options.sample
+      end
+    end
+    p return_array
   end
 
   def check_guess(guess_array, answer_array)
@@ -62,6 +81,14 @@ class Game
       end
     end
     status.shuffle
+  end
+
+  # WE NEED A REAL PRINT FUNCTION FOR THE CURRENT BOARD AND THE ALL THE GUESS_CHECK_OUTPUTS
+  def printer(array_of_guesses, array_of_checker_outputs)
+    puts 'Round             Your Guesses              Response'
+    array_of_guesses.each_index do |i|
+      puts "ROUND #{i + 1}        #{array_of_guesses[i]}          #{array_of_checker_outputs[i]}"
+    end
   end
 end
 
@@ -95,17 +122,17 @@ def play()
   end
 
   puts "\nYou have played all #{max_number_of_games} games"
+  puts "\n#{p1.name} has #{p1.points} points"
+  puts "\n#{p2.name} has #{p2.points} points"
 
   if p1.points > p2.points
-    puts "\nCongrats #{p1.name}, you're the winner"
+    puts "\nCongrats #{p1.name}, you're the winner\n\n"
   elsif p1.points < p2.points
     puts "\nCongrats #{p2.name}, you're the winner and p1 sucks\n\n"
   end
 end
 
-play()
+play
 
-# game = Game.new
-
-
-# puts p1.points = 10
+# THINGS TO DO:
+# make a computerPlayer class, figure out how to embed logic for weather or not to use computer turn functions in Class Game
