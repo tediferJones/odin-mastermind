@@ -227,7 +227,7 @@ def play
   if p1.points > p2.points
     puts "\nCongrats #{p1.name}, you're the winner\n\n"
   elsif p1.points < p2.points
-    puts "\nCongrats #{p2.name}, you're the winner and p1 sucks\n\n"
+    puts "\nCongrats #{p2.name}, you're the winner\n\n"
   else
     puts "\nIT WAS A TIE, BOTH OF YOU ARE SUCKERS"
   end
