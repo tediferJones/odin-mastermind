@@ -4,76 +4,107 @@ class Game
   def initialize(player1, player2)
     # ASK WHO WOULD LIKE TO BE THE CODE BREAKER, USE @@VARIABLE TO REMEMBER BETWEEN CALLING CLASS GAME
     # could probably move all these case statements to their own method, call method decide_code_breaker
-    case @@old_code_breaker
-    when nil
-      puts "Who wants to be the codebreaker? Please enter your name"
-      code_breaker_name = gets.chomp.capitalize
-      case code_breaker_name
-      when player1.name
-        @code_breaker = player1
-        @@old_code_breaker = player1
-      when player2.name
-        @code_breaker = player2
-        @@old_code_breaker = player2
-      end
-    when player1
-      @code_breaker = player2
-      @@old_code_breaker = player2
-    when player2
-      @code_breaker = player1
-      @@old_code_breaker = player1
-    end
+#    case @@old_code_breaker
+#    when nil
+#      puts "Who wants to be the codebreaker? Please enter your name"
+#      puts "If you want to select the computer, type Computer1"
+#      if player1.class == ComputerPlayer && player2.class == ComputerPlayer
+#        @code_breaker = [player1, player2].sample
+#      else
+#        code_breaker_name = gets.chomp.capitalize
+#        case code_breaker_name
+#        when player1.name
+#          @code_breaker = player1
+#          #@@old_code_breaker = player1
+#        when player2.name
+#          @code_breaker = player2
+#          #@@old_code_breaker = player2
+#        end
+#      end
+#      @@old_code_breaker = @code_breaker
+#    when player1
+#      @code_breaker = player2
+#      @@old_code_breaker = player2
+#    when player2
+#      @code_breaker = player1
+#      @@old_code_breaker = player1
+#    end
+    code_breaker_picker(player1, player2)
     case @code_breaker
     when player1
       @code_maker = player2
     when player2
       @code_maker = player1
     end
+    # DONT FUCK WITH THIS
+    if @code_breaker.class == ComputerPlayer
+      @all_possibilities = %w[Red Purple Blue Green Yellow Orange].repeated_permutation(4).to_a
+    end
     #@code_breaker = player1
     #@code_maker = player2
     @secret_code = []
     @total_points = 0
+    p @code_breaker
+    p @code_maker
   end
 
   def start_game
     winner = false
-    current_round = 0
+    @current_round = 0
     max_round = 12
     total_guesses = []
-    total_check_guess_output = []
+    @total_check_guess_output = []
 
     puts "\nWelcome to the game! The codemaker is #{@code_maker.name} and the codebreaker is #{@code_breaker.name}!"
     puts "\n#{@code_breaker.name} look away! #{@code_maker.name} please input your secret code!"
     input_dialog
     # determines if program needs to set secret code automatically (i.e. codemaker is a computer)
-    if @code_maker.class == ComputerPlayer
-      @secret_code = sanitized_input(" ")
-    else
-      @secret_code = sanitized_input(gets.chomp)
-    end
+#    if @code_maker.class == ComputerPlayer
+#      @secret_code = sanitized_input(" ")
+#    else
+#      @secret_code = sanitized_input(gets.chomp)
+#    end
+    set_player(@code_maker, @secret_code)
 
-    while current_round < max_round && winner == false
-      puts "\nTHIS IS ROUND #{current_round + 1}"
+    while @current_round < max_round && winner == false
+      puts "\nTHIS IS ROUND #{@current_round + 1}"
       puts "\n#{@code_breaker.name} Please Enter Your Guess"
       input_dialog
       # determines if program needs to make random guess (i.e. codebreaker is a computer)
-      if @code_breaker.class == ComputerPlayer
-        guess = sanitized_input(" ") # sanitized_input(@code_breaker.generate_computer_guess())
-      else
-        guess = sanitized_input(gets.chomp)
-      end  
+#      if @code_breaker.class == ComputerPlayer
+#        guess = generate_computer_guess(@total_check_guess_output) # sanitized_input(" ") # sanitized_input(generate_computer_guess(total_guess_check_output))
+#      else
+#        guess = sanitized_input(gets.chomp)
+#      end
+      guess = set_player(@code_breaker)
       total_guesses << guess
-      total_check_guess_output << check_guess(guess, @secret_code)
-      puts "\n" * 50
-      printer(total_guesses, total_check_guess_output)
+      @total_check_guess_output << check_guess(guess) # , @secret_code)
+      # puts "\n" * 50 ######################################################## BRING THIS BACK LATER
+      printer(total_guesses, @total_check_guess_output)
 
       # checks for winner
-      winner = true if total_check_guess_output.include?([true, true, true, true])
-      current_round += 1
+      winner = true if @total_check_guess_output.include?([true, true, true, true])
+      @current_round += 1
     end
-    @code_maker.points += current_round
+    @code_maker.points += @current_round
     @code_maker.points += 1 if winner == false
     puts "\nThat it for this game, the codemaker #{@code_maker.name} has #{@code_maker.points}"
+  end
+
+  def set_player(player, thing_to_set="guess")
+    if thing_to_set == @secret_code
+      if player.class == ComputerPlayer
+        @secret_code = sanitized_input(" ")
+      else
+        @secret_code = sanitized_input(gets.chomp)
+      end
+    else
+      if player.class == ComputerPlayer
+        generate_computer_guess(@total_check_guess_output) # sanitized_input(" ") # sanitized_input(generate_computer_guess(total_guess_check_output))
+      else
+        sanitized_input(gets.chomp)
+      end
+    end
   end
 
   def sanitized_input(input)
@@ -97,9 +128,10 @@ class Game
     puts "Only pick 4, seperate with spaces"
   end
 
-  def check_guess(guess_array, answer_array)
+  def check_guess(guess_array)
     # take the secret code and the guess code.  See if first digit of guess code is anywhere in secret code, if it is, status = nil (color is correct, location is not)
     # if the color is correct, check to see if its position is correct, if colors and position are correct, status = true
+    answer_array = @secret_code
     status = []
     guess_array.each_index do |index|
       if answer_array.include?(guess_array[index])
@@ -115,12 +147,68 @@ class Game
     status.shuffle
   end
 
-  # WE NEED A REAL PRINT FUNCTION FOR THE CURRENT BOARD AND THE ALL THE GUESS_CHECK_OUTPUTS
+  def code_breaker_picker(player1, player2)
+    case @@old_code_breaker
+    when nil
+      puts "Who wants to be the codebreaker? Please enter your name"
+      puts "If you want to select the computer, type Computer1"
+      if player1.class == ComputerPlayer && player2.class == ComputerPlayer
+        @code_breaker = [player1, player2].sample
+      else
+        code_breaker_name = gets.chomp.capitalize
+        case code_breaker_name
+        when player1.name
+          @code_breaker = player1
+          #@@old_code_breaker = player1
+        when player2.name
+          @code_breaker = player2
+          #@@old_code_breaker = player2
+        end
+      end
+      @@old_code_breaker = @code_breaker
+    when player1
+      @code_breaker = player2
+      @@old_code_breaker = player2
+    when player2
+      @code_breaker = player1
+      @@old_code_breaker = player1
+    end
+  end
+
   def printer(array_of_guesses, array_of_checker_outputs)
     puts 'Round             Your Guesses              Response'
     array_of_guesses.each_index do |i|
       puts "ROUND #{i + 1}        #{array_of_guesses[i]}          #{array_of_checker_outputs[i]}"
     end
+  end
+
+  def generate_computer_guess(array_of_checker_outputs) # (array_of_guesses, array_of_checker_outputs)
+    if @current_round == 0
+      return %w[Red Red Red Red] # Purple Purple]
+    else
+      # REMOVE ALL ARRAYS THAT ARE LESS TRUTHY THAN CURRENT GUESS
+      latest_response = array_of_checker_outputs[-1]
+      @all_possibilities.select! do |possibility|
+        possibility_check_result = check_guess(possibility)
+        # (possibility_check_result - latest_response).empty? # should work REMOVED "NOT" FROM BEGINING
+        score_guess(possibility_check_result) > score_guess(latest_response)
+      end
+      p "##############################{@all_possibilities.length}###############################"
+      return @all_possibilities.sample
+    end
+  end
+
+  # should be able to tune strength of the AI by changing score values
+  def score_guess(array)
+    score = 0
+    array.each do |item|
+      if item == true
+        score += 2
+      elsif item == nil
+        score += 1
+      end
+    end
+    score
   end
 end
 
@@ -143,24 +231,10 @@ class ComputerPlayer
 
   @@id = 1
   def initialize
-    @used_guesses = []
+    #@used_guesses = []
     @points = 0
     @name = "Computer#{@@id}"
     @@id += 1
-  end
-
-  def generate_computer_guess(array_of_guesses, array_of_checker_outputs)
-    # should output a string of 4 colors, seperated by spaces
-    # should probably take total_guesses and total_check_guess_output as inputs, and use that info to determine if guess is "good"
-    # guess is bad if...
-    #    - guess already exists in total_guesses (trying the same guess twice is pointless)
-    #    - 
-    # if guess passes all tests, return guess to sanitized_input functions or just have this function return a correctly formatted array
-    #if
-      # reasign guess
-    #else
-      # return guess
-    #end
   end
 end
 
@@ -208,4 +282,7 @@ end
 play
 
 # fix capitalizition and grammer of dialog options
-# make code_breaker guesses more efficient for Class ComputerPlayer
+# [ DONE ] make code_breaker guesses more efficient for Class ComputerPlayer
+# add replay function (call play at bottom of method play with some dialog)
+# [ DONE ] Create auto assign function for to assign codebreaker if two computers are playing
+
