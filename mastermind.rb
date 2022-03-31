@@ -26,7 +26,7 @@ class Game
     total_guesses = []
     @total_check_guess_output = []
 
-    puts "\nWelcome to the game! The codemaker is #{@code_maker.name} and the codebreaker is #{@code_breaker.name}!"
+    puts "\nThe codemaker is #{@code_maker.name} and the codebreaker is #{@code_breaker.name}!"
     puts "\n#{@code_breaker.name} look away! #{@code_maker.name} please input your secret code!"
     input_dialog
     set_player(@code_maker, @secret_code)
@@ -52,6 +52,8 @@ class Game
   end
 
   def code_breaker_picker(player1, player2)
+    # puts player1
+    # puts player2
     case @@old_code_breaker
     when nil
       puts 'Who wants to be the codebreaker? Please enter your name'
@@ -173,9 +175,11 @@ class Player
     @points = 0
     puts 'Welcome to Mastermind, what is your name?'
     temp = gets.chomp.capitalize
-    if temp == ""
-      @name = "HumanPlayer#{@@id+1}"
+    if temp == ''
+      @name = "HumanPlayer#{@@id + 1}"
       @@id += 1
+    else
+      @name = temp
     end
   end
 end
@@ -217,7 +221,9 @@ def play
                  Game.new(p2, p1)
                end
     new_game.start_game
+
     current_number_of_games += 1
+    puts "\nYou have #{max_number_of_games - current_number_of_games} game(s) left!"
   end
 
   puts "\nYou have played all #{max_number_of_games} games"
