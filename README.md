@@ -16,4 +16,4 @@ Each round will have to return an array (order should be random) containing 4 of
 
 Based on this feedback, the codebreaker will continue to guess until they run out of turns (12 maximum) or they guess the code correctly
 
-At the end of each round, the codemaker is awarded their points, based on how many guesses occured that round.  If it was guessed in the first round the codemaker recieves 1 point, if it was guessed in the 12th round, the codemaker would receive 12 points, and if the secret code was never correctly guessed, the codemaker receives 13 points
+At the end of each round, the codemaker is awarded their points, based on how many guesses occured that round.  If it was guessed in the first round the codemaker recieves 1 point, if it was guessed in the 12th round, the codemaker would receive 12 points, and if the secret code was never correctly guessed, the codemaker receives 13 points 
